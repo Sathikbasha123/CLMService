@@ -1,0 +1,18 @@
+{
+	"createEnvelopeMultiple": "http://localhost:8085/createEnvelopeMultiple",
+	"getEnvelopeById": "http://localhost:8085/envelope/",
+	"getListOfEnvelopes": "http://localhost:8085/getListOfEnvelopes/envelopeids",
+	"updateTemplate": "http://localhost:8085/update/template/{templateId}",
+	"createTemplate": "http://localhost:8085/create/template",
+	"auditLogs": "http://localhost:8085/audit/",
+	"users": "http://localhost:8085/users",
+	"envelopeDocuments": "http://localhost:8085/getEnvelopeDocuments/{envelopeId}/{documentId}",
+	"listEnvelopeRecipients": "http://localhost:8085/listEnvelopeRecipients/{envelopeId}",
+	"envelopeDocumentDetails": "http://localhost:8085/getEnvelopeDocumentDetails/{envelopeId}",
+	"listTemplateById": "http://localhost:8085/template/{templateId}",
+	"templates": "http://localhost:8085/templates",
+	"templateDocuments": "http://localhost:8085/getTemplateDocuments/{templateId}/{documentId}",
+	"templateComments": "http://saaspe-docusign-svc:8085/getEnvelopeComment/{envelopeId}",
+	"updateEnvelopeMultiple": "http://saaspe-docusign-svc:8085/updateEnvelopeMultiple",
+	"envelopeByEnvelopeId": "{docusignHost}/getIndividualEnvelopeStatus/{envelopeId}"
+}

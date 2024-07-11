@@ -1,0 +1,110 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+  - main
+  - dev
+  - pre-prod
+  - sit
+
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    major-minor: "prod.1.0"
+    env: "prod"
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'sit') }}:
+    major-minor: "sit.1.0"
+    env: "sit"
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}:
+    major-minor: "dev.1.0"
+    env: "dev"
+  revision: $[ counter(variables['major-minor'],0) ]
+stages:
+  - stage: Analyse
+    jobs:
+      - job: SonarQube
+        steps:
+           - task: SonarQubePrepare@5
+             inputs:
+               SonarQube: 'sonarqube-clm-ms'
+               scannerMode: 'CLI'
+               configMode: 'manual'
+               cliProjectKey: 'SaasPe_saaspe-clm-microservice_AYz3Q69PC9Rhdzxf8-pv'
+               cliProjectName: 'saaspe-clm-microservice'
+               cliSources: '.'
+               extraProperties: |
+                 # Additional properties that will be passed to the scanner, 
+                 # Put one key=value per line, example:
+                 # sonar.exclusions=**/*.bin
+                 sonar.java.binaries=.
+           - task: SonarQubeAnalyze@5
+             inputs:
+               jdkversion: 'JAVA_HOME_11_X64'
+        condition: eq(variables['env'], 'prod')  
+  - stage: "build"
+    jobs:
+      - job: build
+        steps:
+  
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'saaspe-resource-connection'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az extension add --name azure-devops
+                az pipelines variable-group variable list --group-id 4 --org "https://dev.azure.com/mindgraph" --project "SaasPe"
+                az pipelines variable-group variable update --group-id 4 --name "$(env)" --value "$(major-minor).$(revision)" --org "https://dev.azure.com/mindgraph" --project "SaasPe"
+            env:
+              AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+          - task: Maven@4
+            inputs:
+              mavenPomFile: 'pom.xml'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              javaHomeOption: 'JDKVersion'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'saaspe-public-hub'
+              repository: 'saaspe-clm'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(major-minor).$(revision)
+                $(env).latest
+
+          # - task: AzureCLI@2
+          #   inputs:
+          #     azureSubscription: 'saaspe-resource-connection'
+          #     scriptType: 'pscore'
+          #     scriptLocation: 'inlineScript'
+          #     inlineScript: |
+              
+          #       $jenkinsUsername = "robot"
+          #       $jenkinsApiToken = "118577899ae79563449a2093460eab76de"
+                                              
+          #       # Variables to pass to Jenkins as parameters
+          #       $param1 = '$(major-minor).$(revision)'
+          #       #$param2 = "$(VARIABLE_NAME_IN_AZURE_DEVOPS_2)"
+          #       # Add more variables as needed
+                                              
+          #       # Construct the URL with parameters
+          #       $jenkinsUrlWithParams = "https://jenkins.saaspe.com/job/ms-$(env)/job/saaspe-clm-microservice/job/clm-microservice-deployment/buildWithParameters?VERSION=$param1"
+          #       # Add more parameters as needed
+                                              
+          #       # Trigger Jenkins build with parameters using REST API
+          #       Invoke-RestMethod -Uri $jenkinsUrlWithParams -Headers @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($jenkinsUsername):$($jenkinsApiToken)"))} -Method Post
+          #   condition: eq(variables['env'], 'dev')
+  
+              

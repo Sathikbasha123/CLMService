@@ -1,0 +1,17 @@
+{
+	"createEnvelopeMultiple": "http://docusign-service:8084/createEnvelopeMultiple",
+	"getEnvelopeById": "http://docusign-service:8084/envelope/",
+	"getListOfEnvelopes": "http://docusign-service:8084/getListOfEnvelopes/envelopeids",
+	"updateTemplate": "http://docusign-service:8084/update/template/{templateId}",
+	"createTemplate": "http://docusign-service:8084/create/template",
+	"auditLogs": "http://docusign-service:8084/audit/",
+	"users": "http://docusign-service:8084/users",
+	"envelopeDocuments": "http://docusign-service:8084/getEnvelopeDocuments/{envelopeId}/{documentId}",
+	"listEnvelopeRecipients": "http://docusign-service:8084/listEnvelopeRecipients/{envelopeId}",
+	"envelopeDocumentDetails": "http://docusign-service:8084/getEnvelopeDocumentDetails/{envelopeId}",
+	"listTemplateById": "http://docusign-service:8084/template/{templateId}",
+	"templates": "http://docusign-service:8084/templates",
+	"templateDocuments": "http://docusign-service:8084/getTemplateDocuments/{templateId}/{documentId}",
+	"templateComments": "http://docusign-service:8084/getEnvelopeComment/{envelopeId}",
+	"updateEnvelopeMultiple": "http://docusign-service:8084/updateEnvelopeMultiple"
+}
